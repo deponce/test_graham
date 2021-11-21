@@ -84,35 +84,6 @@ class training_monitor():
     def get_acc_loss(self):
         return [self.top1accuracy(),self.top5accuracy(),self.avg_loss()]
 
-class ImageNetData(Dataset):
-    def __init__(self, samples=None, targets=None, transform=None, augment=False, height=256, width=256, C_in=3):
-        self.samples = samples
-        self.targets = targets
-        self.transform = transform
-        self.augment = augment
-        self.height = height
-        self.width = width
-        self.C_in = C_in
-    def __len__(self):
-        return self.samples.shape[0]
-    def __getitem__(self, idx):
-        sample = self.samples[idx]
-        if self.transform is not None:
-            # should be a single sample at a time here
-            sample = sample.reshape(self.height, self.width, self.C_in)
-            sample = self.transform(sample)
-        # recasting
-        sample = np.array(sample).astype(np.double)
-        sample = torch.from_numpy(sample)
-        # if we're augmenting the data, then the PIL images
-        # will return the domain of the image to [0,255]
-        # so we need to renormalize each sample
-        if self.augment:
-            return (sample / 255.) - 0.5, self.targets[idx]
-        # on the other hand, if we are not augmenting, there is no need for this additional normalization
-        return sample, self.targets[idx]
-
-
 def imshow(img):
     img = img / 2 + 0.5     # unnormalize
     npimg = img.numpy()
@@ -121,37 +92,14 @@ def imshow(img):
 
 def load_data(filepath= './data', augment=True):
 
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-
-    train_transforms = [transforms.Resize(256),
-                        transforms.CenterCrop(224),
-                        transforms.ToTensor(),
-                        normalize]
-    if augment:
-        train_transforms = [transforms.RandomResizedCrop(224),
-                            transforms.RandomHorizontalFlip(),
-                            transforms.ToTensor(),
-                            normalize]
-    """
-    train_set = datasets.ImageNet(root=filepath, split='val',
-                                  transform=transforms.Compose(train_transforms))
-
-    test_set = datasets.ImageNet(root=filepath, split='val',
-                                 transform=transforms.Compose(
-                                     [transforms.Resize(256),
-                                      transforms.CenterCrop(224),
-                                      transforms.ToTensor(), normalize]))
-    
-    """
     transform = transforms.Compose(
         [transforms.ToTensor(),
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     train_set = datasets.CIFAR10(root='./data', train=True,
-                                            download=False, transform=transform)
+                                            download=True, transform=transform)
 
     test_set = datasets.CIFAR10(root='./data', train=False,
-                                           download=False, transform=transform)
+                                           download=True, transform=transform)
 
     return train_set, None,  test_set
 
