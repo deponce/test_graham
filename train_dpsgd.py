@@ -8,7 +8,7 @@ import torch.nn as nn
 import torchvision
 from torchvision import models, datasets, transforms
 from torch.optim.lr_scheduler import MultiStepLR
-from utils import ImageNetData, load_data, verify_check_points_folder, training_monitor, load_checkpoint
+from utils import load_data, verify_check_points_folder, training_monitor, load_checkpoint
 from Optim import SGD_AGC
 from models.models import model_dict
 from imagenet import *
